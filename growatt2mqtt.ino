@@ -281,14 +281,16 @@ void setup() {
 
 void callback(char* topic, byte* payload, unsigned int length) {
   // Convert the incoming byte array to a string
-
   int i = 0;
   uint8_t result;
-  for (i = 0; i < length; i++) {        // each char to upper
-    payload[i] = toupper(payload[i]);
-  }
   payload[length] = '\0';               // Null terminator used to terminate the char array
   String message = (char*)payload;
+
+  // Use untouched message for custom processing
+  onReceivedMqttMessage(mqtt, topic, message.c_str());
+
+  // Convert to uppercase
+  message.toUpperCase();
 
   char expectedTopic[40];
 
@@ -390,6 +392,7 @@ void loop() {
   if (mqtt_server != "") {
     if (!mqtt.connected()) {
       reconnect();
+      onConnectedToMqttBroker(mqtt);
     }
     mqtt.loop();
   }
